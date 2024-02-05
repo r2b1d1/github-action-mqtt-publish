@@ -1,0 +1,45 @@
+name: 'Github Action MQTT Publish'
+description: 'Publish a MQTT message'
+branding:
+  icon: message-circle
+  color: green
+inputs:
+  protocol:
+    required: true
+  host:
+    description: 'MQTT broker url or ip address'
+    required: true
+  port:
+    description: 'MQTT broker port'
+    required: true
+  topic:
+    required: true
+  message:
+    required: true
+  qos:
+    description: 'Quality of service, defaults to 0'
+    required: false
+  retain:
+    description: 'Tell the broker to retain the message, defaults to false'
+    required: false
+  id:
+    description: 'Client id'
+    required: false
+  username:
+    description: 'Username required by the broker'
+    required: false
+  password:
+    description: 'Password required by the broker'
+    required: false
+  timeout:
+    description: 'MQTT connection timeout, defaults to 4000ms'
+    required: false
+  version:
+    description: 'MQTT protocol version, 3, 4 or 5, defaults to 5'
+    required: false
+  maxRetries:
+    description: 'Maximum reconnect retries before stopping the client'
+    required: false
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

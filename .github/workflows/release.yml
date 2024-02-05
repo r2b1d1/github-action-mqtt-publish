@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Create release version
+      run: |
+        NAME=${GITHUB_REPOSITORY#*/}
+        VERSION=${GITHUB_REF_NAME#v}
+        CURRENT_TAG=$(git tag --sort=-creatordate | head -2 | head -1)
+        PREVIOUS_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
+        TOTAL_TAGS=$(git tag | wc -l)
+        echo "NAME=$NAME" >> $GITHUB_ENV
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "CURRENT_TAG=$CURRENT_TAG" >> $GITHUB_ENV
+        echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_ENV
+        echo "TOTAL_TAGS=$TOTAL_TAGS" >> $GITHUB_ENV
+
+    - name: Generate Changelog All
+      if: env.TOTAL_TAGS == '1'
+      run: |
+        echo "__Changes in this release:__" > changelog
+        git log --pretty=format:"- __%h__:%s" ${CURRENT_TAG} >> changelog
+
+    - name: Generate Changelog Delta
+      if: env.TOTAL_TAGS != '1'
+      run: |
+        echo "__Changes in this release:__" > changelog
+        git log --pretty=format:"- __%h__:%s" ${PREVIOUS_TAG}...${CURRENT_TAG} >> changelog
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: changelog
